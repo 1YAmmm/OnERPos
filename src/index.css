@@ -102,3 +102,6 @@
 .animate-spin-slow {
   animation: spin-slow 12s linear infinite;
 }
+html {
+  scroll-behavior: smooth;
+}

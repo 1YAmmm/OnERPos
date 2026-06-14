@@ -188,7 +188,7 @@ export function LandingPage() {
               to="/login"
               className="text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-lg transition-colors font-medium"
             >
-              Get started
+              Start for free
             </Link>
           </div>
           <button
@@ -224,7 +224,7 @@ export function LandingPage() {
                 to="/login"
                 className="mt-2 text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg text-center font-medium"
               >
-                Get started
+                Start for free
               </Link>
             </motion.div>
           )}
@@ -281,18 +281,21 @@ export function LandingPage() {
 
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 w-full sm:w-auto">
                 <Link
-                  to="/login"
+                  to="/register"
                   className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-indigo-500/20"
                 >
-                  Start free trial
-                  <ArrowRight className="w-4 h-4" />
+                  Start for free
                 </Link>
-                <Link
-                  to="/login"
+                <button
+                  onClick={() =>
+                    document
+                      .getElementById("demo-preview")
+                      ?.scrollIntoView({ behavior: "smooth" })
+                  }
                   className="w-full sm:w-auto flex items-center justify-center gap-2 glass hover:bg-white/8 text-white/70 px-6 py-3 rounded-xl font-medium transition-all duration-200 border border-white/8"
                 >
-                  View live demo
-                </Link>
+                  See how it works
+                </button>
               </div>
             </div>
 
@@ -319,13 +322,14 @@ export function LandingPage() {
             </div>
           </div>
         </FadeIn>
-
-        {/* Dashboard preview */}
-        <FadeIn delay={0.2} className="mt-6 relative">
-          <ContainerScroll>
-            <UIOwnerDashboard />
-          </ContainerScroll>
-        </FadeIn>
+        <div id="demo-preview">
+          {/* Dashboard preview */}
+          <FadeIn delay={0.2} className="mt-6 relative">
+            <ContainerScroll>
+              <UIOwnerDashboard />
+            </ContainerScroll>
+          </FadeIn>
+        </div>
         {/* POS preview */}
         <FadeIn delay={0.2} className="mt-6 relative">
           <ContainerScroll>
@@ -591,7 +595,12 @@ export function LandingPage() {
         <FadeIn>
           <div className="glass-strong rounded-3xl p-12 border border-indigo-500/15 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/8 via-transparent to-violet-500/8 pointer-events-none" />
-            <Shield className="w-10 h-10 text-indigo-400 mx-auto mb-5" />
+
+            <img
+              src={logo}
+              alt="OnERPos"
+              className="h-16 w-auto object-contain mx-auto mb-5"
+            />
             <h2 className="text-3xl sm:text-4xl font-bold text-white/90 mb-4 tracking-tight">
               Ready to run your business better?
             </h2>
@@ -603,10 +612,10 @@ export function LandingPage() {
               to="/login"
               className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3.5 rounded-xl font-medium transition-all shadow-lg shadow-indigo-500/20"
             >
-              Start your free trial <ArrowRight className="w-4 h-4" />
+              Get Started Free
             </Link>
             <p className="text-xs text-white/25 mt-4">
-              14-day free trial · No credit card · Cancel anytime
+              No credit card required · Free to get started · Cancel anytime
             </p>
           </div>
         </FadeIn>
@@ -618,12 +627,19 @@ export function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-10">
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-7 h-7 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center">
-                  <Zap className="w-4 h-4 text-white" />
+                <img
+                  src={logo}
+                  alt="OnERPos"
+                  className="h-16 w-auto object-contain"
+                />
+                <div className="flex flex-col leading-tight items-start">
+                  <span className="text-[24px] font-extrabold text-[#ffffff] tracking-wide">
+                    OnERPos
+                  </span>
+                  <span className="text-[12px] gradient-text tracking-wide">
+                    All in one Business Management
+                  </span>
                 </div>
-                <span className="text-sm font-semibold text-white/80">
-                  OnERPos
-                </span>
               </div>
               <p className="text-xs text-white/30 leading-relaxed">
                 The complete business management platform for modern operators.

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Zap,
   Eye,
   EyeOff,
   ArrowRight,
@@ -13,6 +12,8 @@ import {
   Briefcase,
   ChevronDown,
   CheckCircle2,
+  ScrollText,
+  ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import logo from "../assets/onerposlogo.webp";
@@ -33,8 +34,9 @@ const BUSINESS_TYPES = [
 ];
 
 const steps = [
-  { id: 1, label: "Business Info" },
-  { id: 2, label: "Account Setup" },
+  { id: 1, label: "Terms" },
+  { id: 2, label: "Business Info" },
+  { id: 3, label: "Account Setup" },
 ];
 
 export function RegisterPage() {
@@ -45,6 +47,8 @@ export function RegisterPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [success, setSuccess] = useState(false);
   const [typeOpen, setTypeOpen] = useState(false);
+  const [termsChecked, setTermsChecked] = useState(false);
+  const [termsError, setTermsError] = useState("");
 
   const [form, setForm] = useState({
     businessName: "",
@@ -62,7 +66,17 @@ export function RegisterPage() {
     setFieldErrors((fe) => ({ ...fe, [k]: "" }));
   };
 
-  const validateStep1 = () => {
+  const handleAcceptTerms = (e) => {
+    e.preventDefault();
+    if (!termsChecked) {
+      setTermsError("You must accept the Terms & Conditions to continue.");
+      return;
+    }
+    setTermsError("");
+    setStep(2);
+  };
+
+  const validateStep2 = () => {
     const errs = {};
     if (!form.businessName.trim())
       errs.businessName = "Business name is required";
@@ -72,7 +86,7 @@ export function RegisterPage() {
     return Object.keys(errs).length === 0;
   };
 
-  const validateStep2 = () => {
+  const validateStep3 = () => {
     const errs = {};
     if (!form.email.trim()) errs.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(form.email))
@@ -87,12 +101,12 @@ export function RegisterPage() {
 
   const handleNext = (e) => {
     e.preventDefault();
-    if (validateStep1()) setStep(2);
+    if (validateStep2()) setStep(3);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateStep2()) return;
+    if (!validateStep3()) return;
     const result = await register(form);
     if (result.success) {
       setSuccess(true);
@@ -198,9 +212,192 @@ export function RegisterPage() {
           </div>
 
           <AnimatePresence mode="wait">
-            {step === 1 ? (
+            {/* ── Step 1: Terms & Conditions ── */}
+            {step === 1 && (
               <motion.form
                 key="step1"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+                onSubmit={handleAcceptTerms}
+                className="space-y-4"
+              >
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center shrink-0">
+                    <ScrollText className="w-4 h-4 text-indigo-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white/85">
+                      Terms & Conditions
+                    </p>
+                    <p className="text-xs text-white/35">
+                      Please read carefully before continuing
+                    </p>
+                  </div>
+                </div>
+
+                {/* Scrollable T&C box */}
+                <div className="glass rounded-xl p-4 h-56 overflow-y-auto text-xs text-white/50 leading-relaxed space-y-3 border border-white/8">
+                  <p className="text-white/70 font-semibold text-[11px] uppercase tracking-wider">
+                    1. Acceptance of Terms
+                  </p>
+                  <p>
+                    By creating an account and using OnERPos, you agree to be
+                    bound by these Terms & Conditions. If you do not agree to
+                    these terms, please do not register or use the service.
+                  </p>
+
+                  <p className="text-white/70 font-semibold text-[11px] uppercase tracking-wider">
+                    2. Use of Service
+                  </p>
+                  <p>
+                    OnERPos provides a point-of-sale and business management
+                    platform intended for lawful commercial use only. You agree
+                    not to misuse the platform, attempt unauthorized access, or
+                    use it for any illegal or fraudulent activity.
+                  </p>
+
+                  <p className="text-white/70 font-semibold text-[11px] uppercase tracking-wider">
+                    3. Account Responsibility
+                  </p>
+                  <p>
+                    You are responsible for maintaining the confidentiality of
+                    your login credentials. All activity that occurs under your
+                    account is your sole responsibility. Notify us immediately
+                    if you suspect unauthorized use of your account.
+                  </p>
+
+                  <p className="text-white/70 font-semibold text-[11px] uppercase tracking-wider">
+                    4. Data & Privacy
+                  </p>
+                  <p>
+                    We collect and process personal and business data as
+                    described in our Privacy Policy. By using OnERPos, you
+                    consent to such processing. We implement reasonable security
+                    measures to protect your data but cannot guarantee absolute
+                    security.
+                  </p>
+
+                  <p className="text-white/70 font-semibold text-[11px] uppercase tracking-wider">
+                    5. Intellectual Property
+                  </p>
+                  <p>
+                    All content, features, and functionality of OnERPos —
+                    including but not limited to software, design, and
+                    trademarks — are the exclusive property of OnERPos and are
+                    protected by applicable intellectual property laws.
+                  </p>
+
+                  <p className="text-white/70 font-semibold text-[11px] uppercase tracking-wider">
+                    6. Limitation of Liability
+                  </p>
+                  <p>
+                    OnERPos shall not be liable for any indirect, incidental,
+                    special, or consequential damages arising from your use or
+                    inability to use the service, including loss of revenue or
+                    data.
+                  </p>
+
+                  <p className="text-white/70 font-semibold text-[11px] uppercase tracking-wider">
+                    7. Modifications
+                  </p>
+                  <p>
+                    We reserve the right to update these Terms at any time.
+                    Continued use of OnERPos after changes are posted
+                    constitutes your acceptance of the revised Terms.
+                  </p>
+
+                  <p className="text-white/70 font-semibold text-[11px] uppercase tracking-wider">
+                    8. Governing Law
+                  </p>
+                  <p>
+                    These Terms shall be governed by and construed in accordance
+                    with the laws of the Republic of the Philippines, without
+                    regard to its conflict of law provisions.
+                  </p>
+
+                  <p className="text-white/70 font-semibold text-[11px] uppercase tracking-wider">
+                    9. Contact
+                  </p>
+                  <p>
+                    If you have any questions about these Terms, please contact
+                    us at support@onerpos.com.
+                  </p>
+                </div>
+
+                {/* Checkbox */}
+                <div>
+                  <label className="flex items-start gap-3 cursor-pointer group">
+                    <div className="relative mt-0.5 shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={termsChecked}
+                        onChange={(e) => {
+                          setTermsChecked(e.target.checked);
+                          if (e.target.checked) setTermsError("");
+                        }}
+                        className="sr-only"
+                      />
+                      <div
+                        className={`w-4 h-4 rounded flex items-center justify-center border transition-all ${
+                          termsChecked
+                            ? "bg-indigo-500 border-indigo-500"
+                            : termsError
+                              ? "border-rose-500/60 bg-white/5"
+                              : "border-white/20 bg-white/5 group-hover:border-indigo-500/50"
+                        }`}
+                      >
+                        {termsChecked && (
+                          <svg
+                            className="w-2.5 h-2.5 text-white"
+                            viewBox="0 0 10 8"
+                            fill="none"
+                          >
+                            <path
+                              d="M1 4L3.5 6.5L9 1"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-xs text-white/50 leading-relaxed group-hover:text-white/65 transition-colors">
+                      I have read and agree to the{" "}
+                      <span className="text-indigo-400">
+                        Terms & Conditions
+                      </span>{" "}
+                      and{" "}
+                      <span className="text-indigo-400">Privacy Policy</span> of
+                      OnERPos.
+                    </span>
+                  </label>
+                  {termsError && (
+                    <p className="text-xs text-rose-400 mt-1.5 ml-7">
+                      {termsError}
+                    </p>
+                  )}
+                </div>
+
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  type="submit"
+                  className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-all shadow-lg shadow-indigo-500/20 mt-2"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  Accept & Continue
+                </motion.button>
+              </motion.form>
+            )}
+
+            {/* ── Step 2: Business Info ── */}
+            {step === 2 && (
+              <motion.form
+                key="step2"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
@@ -323,17 +520,29 @@ export function RegisterPage() {
                   )}
                 </div>
 
-                <motion.button
-                  whileTap={{ scale: 0.98 }}
-                  type="submit"
-                  className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-all shadow-lg shadow-indigo-500/20 mt-2"
-                >
-                  Continue <ArrowRight className="w-4 h-4" />
-                </motion.button>
+                <div className="flex gap-3 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="flex-1 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:bg-white/8 transition-colors"
+                  >
+                    Back
+                  </button>
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    type="submit"
+                    className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-all shadow-lg shadow-indigo-500/20"
+                  >
+                    Continue <ArrowRight className="w-4 h-4" />
+                  </motion.button>
+                </div>
               </motion.form>
-            ) : (
+            )}
+
+            {/* ── Step 3: Account Setup ── */}
+            {step === 3 && (
               <motion.form
-                key="step2"
+                key="step3"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
@@ -452,7 +661,7 @@ export function RegisterPage() {
                 <div className="flex gap-3 mt-2">
                   <button
                     type="button"
-                    onClick={() => setStep(1)}
+                    onClick={() => setStep(2)}
                     className="flex-1 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:bg-white/8 transition-colors"
                   >
                     Back

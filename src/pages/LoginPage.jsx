@@ -102,31 +102,6 @@ export function LoginPage() {
           transition={{ delay: 0.1 }}
           className="glass-strong rounded-2xl p-6"
         >
-          {/* Role selector */}
-          <p className="text-xs text-white/40 mb-3 font-medium uppercase tracking-wider">
-            Quick access
-          </p>
-          <div className="grid grid-cols-3 gap-2 mb-5">
-            {ROLES.map((role) => (
-              <button
-                key={role.id}
-                type="button"
-                onClick={() => handleRoleSelect(role)}
-                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl text-center transition-all duration-150 border
-                  ${
-                    selectedRole?.id === role.id
-                      ? "bg-indigo-500/15 border-indigo-500/40 text-indigo-300"
-                      : "glass border-white/6 text-white/40 hover:bg-white/5 hover:text-white/60"
-                  }`}
-              >
-                <role.icon className="w-4 h-4" />
-                <span className="text-[10px] font-medium leading-tight">
-                  {role.label}
-                </span>
-              </button>
-            ))}
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="text-xs text-white/40 font-medium block mb-1.5">
@@ -197,9 +172,13 @@ export function LoginPage() {
             </motion.button>
           </form>
 
-          <p className="text-center text-xs text-white/25 mt-4">
-            Demo credentials: any role above · password:{" "}
-            <code className="text-white/40">demo</code>
+          <p className="text-center text-xs text-white/40 mt-4">
+            <Link
+              to="/register"
+              className="text-indigo-400 hover:text-indigo-300 transition-colors"
+            >
+              Forgot Password?
+            </Link>
           </p>
           <p className="text-center text-xs text-white/25 mt-2">
             New business?{" "}

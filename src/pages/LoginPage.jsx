@@ -12,29 +12,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import logo from "../assets/onerposlogo.webp";
-const ROLES = [
-  {
-    id: "owner",
-    label: "Business Owner",
-    desc: "Full ERP & analytics access",
-    icon: BarChart3,
-    hint: "owner@onerpos.com",
-  },
-  {
-    id: "cashier",
-    label: "Cashier",
-    desc: "POS & transactions",
-    icon: Store,
-    hint: "cashier@onerpos.com",
-  },
-  {
-    id: "admin",
-    label: "System Admin",
-    desc: "Platform administration",
-    icon: ShieldCheck,
-    hint: "admin@onerpos.com",
-  },
-];
+
 
 const REDIRECT = { owner: "/owner", cashier: "/cashier", admin: "/admin" };
 
@@ -55,7 +33,7 @@ export function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await login(email, password);
-    if (result.success) navigate(REDIRECT[result.user.role] ?? "/");
+   if (result.success) navigate(REDIRECT[result.role] ?? "/");
   };
 
   return (

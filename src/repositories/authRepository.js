@@ -10,9 +10,14 @@ const headers = (token = null) => ({
 
 // ── Helper: handles response and throws readable errors ──
 const handleResponse = async (res) => {
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
-  return data;
+  const text = await res.text();
+  try {
+    const data = JSON.parse(text);
+    if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+    return data;
+  } catch {
+    throw new Error(`Server returned non-JSON (${res.status}): ${text.slice(0, 100)}`);
+  }
 };
 
 export const authRepository = {

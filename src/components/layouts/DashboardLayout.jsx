@@ -54,11 +54,11 @@ function getPortalLabel(role) {
 }
 
 export function DashboardLayout({ children }) {
-  const { user, logout } = useAuth();
+const { user, profile, logout } = useAuth();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const nav = getNav(user?.role);
+  const nav = getNav(profile?.role);
 
   const handleLogout = () => { logout(); navigate('/login'); };
 
@@ -72,7 +72,7 @@ export function DashboardLayout({ children }) {
         {!collapsed && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-w-0">
             <p className="text-sm font-semibold text-white/90 truncate">OnERPos</p>
-            <p className="text-[10px] text-white/35 truncate">{getPortalLabel(user?.role)}</p>
+         <p className="text-[10px] text-white/30 capitalize truncate">{profile?.role}</p>
           </motion.div>
         )}
       </div>

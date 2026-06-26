@@ -52,19 +52,20 @@ export function AuthProvider({ children }) {
   };
 
   // ── Login ──
-  const login = async (email, password) => {
+const login = async (email, password) => {
     setLoading(true);
     setError("");
     try {
       const { user: u } = await authService.login(email, password);
       setUser(u);
 
-      // Fetch full profile after login to get role + business info
       const { profile: p } = await authService.fetchMe();
       setProfile(p);
 
+      console.log("✅ Login successful:", { user: u, role: p?.role });
       return { success: true, role: p?.role };
     } catch (err) {
+      console.log("❌ Login failed:", err.message);
       setError(err.message);
       return { success: false };
     } finally {

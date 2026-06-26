@@ -24,6 +24,6 @@ export default async function handler(req, res) {
 
   return res.status(200).json({
     user: data.user,
-    session: data.session, // contains access_token and refresh_token
+    session: data.session, 
   });
 }

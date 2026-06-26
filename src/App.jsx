@@ -65,7 +65,7 @@ function CashierPortal() {
 
 function AdminPortal() {
   return (
-    <ProtectedRoute allowedRoles={['admin','owner']}>
+    <ProtectedRoute allowedRoles={['admin']}>
       <DashboardLayout>
         <Routes>
           <Route index                element={<AdminDashboard />} />

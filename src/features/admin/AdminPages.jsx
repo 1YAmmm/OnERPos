@@ -131,7 +131,7 @@ export function AdminDashboard() {
           {BUSINESSES.slice(0, 3).map(b => (
             <div key={b.id} className="flex items-center justify-between py-2.5 border-b border-white/5 last:border-0">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/20 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-linear-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/20 flex items-center justify-center">
                   <Building2 className="w-4 h-4 text-indigo-400" />
                 </div>
                 <div>
@@ -318,7 +318,7 @@ export function AdminUsers() {
 
   const userCols = [
     { key: 'avatar', label: '', width: 44, render: v => (
-      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500/25 to-violet-500/25 flex items-center justify-center text-xs font-semibold text-indigo-300 border border-indigo-500/20">
+      <div className="w-8 h-8 rounded-lg bg-linear-to-br from-indigo-500/25 to-violet-500/25 flex items-center justify-center text-xs font-semibold text-indigo-300 border border-indigo-500/20">
         {v}
       </div>
     )},

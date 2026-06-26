@@ -10,7 +10,8 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { NotificationPanel } from '../common/NotificationPanel';
 import { cn } from '../../utils/cn';
-
+import { Modal } from '../common/Modal';
+import { SidebarSkeleton } from '../common/Skeleton';
 const ownerNav = [
   { label: 'Overview',    icon: LayoutDashboard, to: '/owner' },
   { label: 'Sales',       icon: ShoppingCart,    to: '/owner/sales' },
@@ -54,19 +55,20 @@ function getPortalLabel(role) {
 }
 
 export function DashboardLayout({ children }) {
-const { user, profile, logout } = useAuth();
+const { user, profile, logout,loading} = useAuth();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const nav = getNav(profile?.role);
-
-  const handleLogout = () => { logout(); navigate('/login'); };
+ const handleLogout = () => { setShowLogoutModal(true); };
+const confirmLogout = () => { logout(); navigate('/login'); };
 
   const SidebarContent = ({ onNavClick }) => (
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className={cn('flex items-center gap-3 px-4 py-5 border-b border-white/8', collapsed && 'justify-center px-3')}>
-        <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center shrink-0">
+        <div className="w-8 h-8  bg-linear-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center shrink-0">
           <Zap className="w-4 h-4 text-white" />
         </div>
         {!collapsed && (
@@ -103,7 +105,7 @@ const { user, profile, logout } = useAuth();
       <div className={cn('border-t border-white/8 p-3', collapsed ? 'flex flex-col items-center gap-2' : 'space-y-1')}>
         {!collapsed && (
           <div className="flex items-center gap-3 px-2 py-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500/30 to-violet-500/30 flex items-center justify-center text-xs font-semibold text-indigo-300 border border-indigo-500/20 shrink-0">
+            <div className="w-7 h-7 rounded-lg  bg-linear-to-br from-indigo-500/30 to-violet-500/30 flex items-center justify-center text-xs font-semibold text-indigo-300 border border-indigo-500/20 shrink-0">
               {user?.avatar}
             </div>
             <div className="min-w-0">
@@ -113,7 +115,7 @@ const { user, profile, logout } = useAuth();
           </div>
         )}
         <button
-          onClick={handleLogout}
+          onClick={() => setShowLogoutModal(true)}
           className={cn(
             'flex items-center gap-2 text-xs text-white/35 hover:text-rose-400 transition-colors rounded-lg px-2 py-1.5 w-full hover:bg-rose-500/8',
             collapsed && 'justify-center w-auto px-2'
@@ -134,7 +136,7 @@ const { user, profile, logout } = useAuth();
         transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
         className="hidden lg:flex flex-col shrink-0 border-r border-white/8 bg-[#0a0f1a] relative z-20 overflow-hidden"
       >
-        <SidebarContent />
+       {loading ? <SidebarSkeleton collapsed={collapsed} /> : <SidebarContent />}
         <button
           onClick={() => setCollapsed(c => !c)}
           className="absolute top-5 -right-3 w-6 h-6 glass rounded-full flex items-center justify-center text-white/40 hover:text-white/70 transition-colors z-30"
@@ -157,7 +159,7 @@ const { user, profile, logout } = useAuth();
             <motion.aside
               initial={{ x: -280 }} animate={{ x: 0 }} exit={{ x: -280 }}
               transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
-              className="fixed left-0 top-0 bottom-0 w-[220px] bg-[#0a0f1a] border-r border-white/8 z-50 lg:hidden"
+              className="fixed left-0 top-0 bottom-0 w-55 bg-[#0a0f1a] border-r border-white/8 z-50 lg:hidden"
             >
               <SidebarContent onNavClick={() => setMobileOpen(false)} />
             </motion.aside>
@@ -185,7 +187,7 @@ const { user, profile, logout } = useAuth();
           <div className="flex items-center gap-2">
             <NotificationPanel />
             <div className="flex items-center gap-2 glass rounded-xl px-3 py-1.5">
-              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500/30 to-violet-500/30 flex items-center justify-center text-[10px] font-semibold text-indigo-300 border border-indigo-500/20">
+              <div className="w-6 h-6 rounded-lg  bg-linear-to-br from-indigo-500/30 to-violet-500/30 flex items-center justify-center text-[10px] font-semibold text-indigo-300 border border-indigo-500/20">
                 {user?.avatar}
               </div>
               <span className="text-xs text-white/60 hidden sm:block">{user?.name}</span>
@@ -206,6 +208,30 @@ const { user, profile, logout } = useAuth();
           </motion.div>
         </main>
       </div>
+      <Modal
+        open={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        title="Sign Out"
+        size="sm"
+      >
+        <p className="text-sm text-white/60 mb-6">
+          Are you sure you want to sign out of your workspace?
+        </p>
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={() => setShowLogoutModal(false)}
+            className="px-4 py-2 text-sm glass rounded-xl text-white/70 hover:bg-white/8 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={confirmLogout}
+            className="px-4 py-2 text-sm bg-rose-600/80 hover:bg-rose-500 text-white rounded-xl transition-colors"
+          >
+            Sign out
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -17,13 +17,7 @@ import {
 import { useCrud } from '../../hooks/useCrud';
 import { EMPLOYEES } from '../../data/mockData';
 
-const ROLES = [
-  'Store Manager',
-  'Sales Associate',
-  'Inventory Clerk',
-  'Cashier',
-  'Supervisor',
-];
+const ROLES = ['Store Manager', 'Cashier'];
 const emptyForm = {
   name: '',
   role: 'Sales Associate',

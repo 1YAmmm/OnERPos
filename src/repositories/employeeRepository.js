@@ -63,10 +63,11 @@ export const employeeRepository = {
     status,
     token,
   }) {
-    const res = await fetch(`${BASE_URL}/${id}`, {
+    const res = await fetch(`${BASE_URL}/update-employee`, {
       method: 'PATCH',
       headers: headers(token),
       body: JSON.stringify({
+        id,
         fullName,
         position,
         hourlyRate,
@@ -78,9 +79,10 @@ export const employeeRepository = {
   },
 
   async delete(id, token) {
-    const res = await fetch(`${BASE_URL}/${id}`, {
+    const res = await fetch(`${BASE_URL}/delete-employee`, {
       method: 'DELETE',
       headers: headers(token),
+      body: JSON.stringify({ id }),
     });
     return handleResponse(res);
   },

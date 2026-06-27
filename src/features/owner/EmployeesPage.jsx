@@ -9,6 +9,7 @@ import { DataTable } from '../../components/common/DataTable';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { useEmployees } from '../../contexts/EmployeeContext';
+import { useAppToast } from '../../hooks/useAppToast';
 import {
   Modal,
   DeleteModal,
@@ -144,13 +145,17 @@ export function EmployeesPage() {
     deleteEmployee,
   } = useEmployees();
 
+  const appToast = useAppToast();
+
   const [submitting, setSubmitting] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   useEffect(() => {
-    fetchEmployees();
+    fetchEmployees().then((result) => {
+      if (!result.success) appToast.employee.fetchFailed();
+    });
   }, []);
 
   if (loading && employees.length === 0) return <EmployeesSkeleton />;
@@ -188,7 +193,12 @@ export function EmployeesPage() {
     setSubmitting(true);
     const result = await registerEmployee(fields);
     setSubmitting(false);
-    if (result.success) closeModal();
+    if (result.success) {
+      appToast.employee.created(fields.fullName);
+      closeModal();
+    } else {
+      appToast.employee.saveFailed(error);
+    }
   };
 
   // ── Update ─────────────────────────────────────────────────────────────────
@@ -196,13 +206,25 @@ export function EmployeesPage() {
     setSubmitting(true);
     const result = await updateEmployee({ id: editTarget.id, ...fields });
     setSubmitting(false);
-    if (result.success) closeModal();
+    if (result.success) {
+      appToast.employee.updated(fields.fullName);
+      closeModal();
+    } else {
+      appToast.employee.saveFailed(error);
+    }
   };
 
   // ── Delete ─────────────────────────────────────────────────────────────────
   const handleDelete = async () => {
-    const result = await deleteEmployee(deleteTarget.id);
-    if (result.success) setDeleteTarget(null);
+    const name = deleteTarget.name;
+    const id = deleteTarget.id;
+    const result = await deleteEmployee(id);
+    if (result.success) {
+      setDeleteTarget(null);
+      appToast.employee.deleted(name);
+    } else {
+      appToast.employee.saveFailed(error);
+    }
   };
 
   // ── Columns ────────────────────────────────────────────────────────────────
@@ -272,12 +294,6 @@ export function EmployeesPage() {
         subtitle="Team records, roles, and payroll overview"
       />
 
-      {error && !modalOpen && (
-        <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg px-4 py-3">
-          {error}
-        </p>
-      )}
-
       <div className="grid grid-cols-3 gap-4">
         {[
           { label: 'Total Staff', value: employees.length, sub: 'employees' },
@@ -324,11 +340,6 @@ export function EmployeesPage() {
           onCancel={closeModal}
           submitting={submitting}
         />
-        {error && (
-          <p className="mt-2 text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg px-3 py-2">
-            {error}
-          </p>
-        )}
       </Modal>
 
       <DeleteModal

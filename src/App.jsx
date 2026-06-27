@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { ToastProvider } from './components/common/Toast';
 import { EmployeeProvider } from './contexts/EmployeeContext';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { DashboardLayout } from './components/layouts/DashboardLayout';
@@ -100,15 +101,17 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/owner/*" element={<OwnerPortal />} />
-          <Route path="/cashier/*" element={<CashierPortal />} />
-          <Route path="/admin/*" element={<AdminPortal />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <ToastProvider>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/owner/*" element={<OwnerPortal />} />
+            <Route path="/cashier/*" element={<CashierPortal />} />
+            <Route path="/admin/*" element={<AdminPortal />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   );

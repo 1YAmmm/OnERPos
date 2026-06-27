@@ -1,7 +1,7 @@
 // src/contexts/AuthContext.jsx
 
-import { createContext, useContext, useEffect, useState } from "react";
-import { authService } from "../services/authService";
+import { createContext, useContext, useEffect, useState } from 'react';
+import { authService } from '../services/authService';
 
 const AuthContext = createContext(null);
 
@@ -9,7 +9,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null); // includes role + business info
   const [loading, setLoading] = useState(true); // true on mount while restoring session
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   // ── Restore session on app load ──
   useEffect(() => {
@@ -36,10 +36,10 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // ── Register ──
+  // ── Register onwer──
   const register = async (form) => {
     setLoading(true);
-    setError("");
+    setError('');
     try {
       await authService.register(form);
       return { success: true };
@@ -54,7 +54,7 @@ export function AuthProvider({ children }) {
   // ── Login ──
   const login = async (email, password) => {
     setLoading(true);
-    setError("");
+    setError('');
     try {
       const { user: u } = await authService.login(email, password);
       setUser(u);
@@ -75,7 +75,7 @@ export function AuthProvider({ children }) {
   // ── Logout ──
   const logout = async () => {
     setLoading(true);
-    setError("");
+    setError('');
     try {
       await authService.logout();
       setUser(null);
@@ -88,7 +88,7 @@ export function AuthProvider({ children }) {
   };
 
   // ── Clear error manually (useful in forms) ──
-  const clearError = () => setError("");
+  const clearError = () => setError('');
 
   return (
     <AuthContext.Provider
@@ -112,9 +112,9 @@ export function AuthProvider({ children }) {
         isAuthenticated: !!user,
 
         // Role booleans — use these in your UI
-        isOwner: profile?.role === "owner",
-        isEmployee: profile?.role === "employee",
-        isSystemAdmin: profile?.role === "system_admin",
+        isOwner: profile?.role === 'owner',
+        isEmployee: profile?.role === 'employee',
+        isSystemAdmin: profile?.role === 'system_admin',
         role: profile?.role || null,
       }}
     >

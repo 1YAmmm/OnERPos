@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Eye,
   EyeOff,
@@ -14,29 +14,29 @@ import {
   CheckCircle2,
   ScrollText,
   ShieldCheck,
-} from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
-import logo from "../assets/onerposlogo.webp";
+} from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import logo from '../assets/onerposlogo.webp';
 
 const BUSINESS_TYPES = [
-  "Retail Store",
-  "Restaurant / Food Service",
-  "Cafe / Coffee Shop",
-  "Grocery / Supermarket",
-  "Pharmacy",
-  "Electronics",
-  "Clothing & Apparel",
-  "Hardware / Home Improvement",
-  "Beauty & Personal Care",
-  "Service Business",
-  "Wholesale / Distribution",
-  "Other",
+  'Retail Store',
+  'Restaurant / Food Service',
+  'Cafe / Coffee Shop',
+  'Grocery / Supermarket',
+  'Pharmacy',
+  'Electronics',
+  'Clothing & Apparel',
+  'Hardware / Home Improvement',
+  'Beauty & Personal Care',
+  'Service Business',
+  'Wholesale / Distribution',
+  'Other',
 ];
 
 const steps = [
-  { id: 1, label: "Terms" },
-  { id: 2, label: "Business Info" },
-  { id: 3, label: "Account Setup" },
+  { id: 1, label: 'Terms' },
+  { id: 2, label: 'Business Info' },
+  { id: 3, label: 'Account Setup' },
 ];
 
 export function RegisterPage() {
@@ -48,39 +48,39 @@ export function RegisterPage() {
   const [success, setSuccess] = useState(false);
   const [typeOpen, setTypeOpen] = useState(false);
   const [termsChecked, setTermsChecked] = useState(false);
-  const [termsError, setTermsError] = useState("");
+  const [termsError, setTermsError] = useState('');
 
   const [form, setForm] = useState({
-    businessName: "",
-    businessType: "",
-    ownerName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    businessName: '',
+    businessType: '',
+    ownerName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
   });
 
   const [fieldErrors, setFieldErrors] = useState({});
 
   const set = (k) => (e) => {
     setForm((f) => ({ ...f, [k]: e.target.value }));
-    setFieldErrors((fe) => ({ ...fe, [k]: "" }));
+    setFieldErrors((fe) => ({ ...fe, [k]: '' }));
   };
 
   const handleAcceptTerms = (e) => {
     e.preventDefault();
     if (!termsChecked) {
-      setTermsError("You must accept the Terms & Conditions to continue.");
+      setTermsError('You must accept the Terms & Conditions to continue.');
       return;
     }
-    setTermsError("");
+    setTermsError('');
     setStep(2);
   };
 
   const validateStep2 = () => {
     const errs = {};
     if (!form.businessName.trim())
-      errs.businessName = "Business name is required";
-    if (!form.businessType) errs.businessType = "Please select a business type";
+      errs.businessName = 'Business name is required';
+    if (!form.businessType) errs.businessType = 'Please select a business type';
     if (!form.ownerName.trim()) errs.ownerName = "Owner's name is required";
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
@@ -88,13 +88,13 @@ export function RegisterPage() {
 
   const validateStep3 = () => {
     const errs = {};
-    if (!form.email.trim()) errs.email = "Email is required";
+    if (!form.email.trim()) errs.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(form.email))
-      errs.email = "Enter a valid email";
-    if (!form.password) errs.password = "Password is required";
-    else if (form.password.length < 6) errs.password = "At least 6 characters";
+      errs.email = 'Enter a valid email';
+    if (!form.password) errs.password = 'Password is required';
+    else if (form.password.length < 6) errs.password = 'At least 6 characters';
     if (form.password !== form.confirmPassword)
-      errs.confirmPassword = "Passwords do not match";
+      errs.confirmPassword = 'Passwords do not match';
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -110,7 +110,7 @@ export function RegisterPage() {
     const result = await register(form);
     if (result.success) {
       setSuccess(true);
-      setTimeout(() => navigate("/login"), 2500);
+      setTimeout(() => navigate('/login'), 2500);
     }
   };
 
@@ -185,10 +185,10 @@ export function RegisterPage() {
                 <div
                   className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors ${
                     step > s.id
-                      ? "bg-indigo-500 text-white"
+                      ? 'bg-indigo-500 text-white'
                       : step === s.id
-                        ? "bg-indigo-500/20 border border-indigo-500/60 text-indigo-300"
-                        : "bg-white/5 border border-white/10 text-white/25"
+                        ? 'bg-indigo-500/20 border border-indigo-500/60 text-indigo-300'
+                        : 'bg-white/5 border border-white/10 text-white/25'
                   }`}
                 >
                   {step > s.id ? (
@@ -198,13 +198,13 @@ export function RegisterPage() {
                   )}
                 </div>
                 <span
-                  className={`text-xs font-medium transition-colors ${step === s.id ? "text-white/70" : "text-white/25"}`}
+                  className={`text-xs font-medium transition-colors ${step === s.id ? 'text-white/70' : 'text-white/25'}`}
                 >
                   {s.label}
                 </span>
                 {i < steps.length - 1 && (
                   <div
-                    className={`h-px flex-1 mx-1 transition-colors ${step > s.id ? "bg-indigo-500/40" : "bg-white/8"}`}
+                    className={`h-px flex-1 mx-1 transition-colors ${step > s.id ? 'bg-indigo-500/40' : 'bg-white/8'}`}
                   />
                 )}
               </div>
@@ -336,17 +336,17 @@ export function RegisterPage() {
                         checked={termsChecked}
                         onChange={(e) => {
                           setTermsChecked(e.target.checked);
-                          if (e.target.checked) setTermsError("");
+                          if (e.target.checked) setTermsError('');
                         }}
                         className="sr-only"
                       />
                       <div
                         className={`w-4 h-4 rounded flex items-center justify-center border transition-all ${
                           termsChecked
-                            ? "bg-indigo-500 border-indigo-500"
+                            ? 'bg-indigo-500 border-indigo-500'
                             : termsError
-                              ? "border-rose-500/60 bg-white/5"
-                              : "border-white/20 bg-white/5 group-hover:border-indigo-500/50"
+                              ? 'border-rose-500/60 bg-white/5'
+                              : 'border-white/20 bg-white/5 group-hover:border-indigo-500/50'
                         }`}
                       >
                         {termsChecked && (
@@ -367,11 +367,11 @@ export function RegisterPage() {
                       </div>
                     </div>
                     <span className="text-xs text-white/50 leading-relaxed group-hover:text-white/65 transition-colors">
-                      I have read and agree to the{" "}
+                      I have read and agree to the{' '}
                       <span className="text-indigo-400">
                         Terms & Conditions
-                      </span>{" "}
-                      and{" "}
+                      </span>{' '}
+                      and{' '}
                       <span className="text-indigo-400">Privacy Policy</span> of
                       OnERPos.
                     </span>
@@ -407,17 +407,17 @@ export function RegisterPage() {
               >
                 {/* Business Name */}
                 <div>
-                  <label className="text-xs text-white/40 font-medium block mb-1.5 flex items-center gap-1.5">
+                  <label className="text-xs text-white/40 font-medium  mb-1.5 flex items-center gap-1.5">
                     <Building2 className="w-3 h-3" /> Business Name
                   </label>
                   <input
                     value={form.businessName}
-                    onChange={set("businessName")}
+                    onChange={set('businessName')}
                     placeholder="e.g. Rivera Enterprises"
                     className={`w-full glass rounded-xl px-4 py-2.5 text-sm text-white/80 placeholder:text-white/20 outline-none transition-colors ${
                       fieldErrors.businessName
-                        ? "border-rose-500/60 focus:border-rose-500/60"
-                        : "focus:border-indigo-500/40"
+                        ? 'border-rose-500/60 focus:border-rose-500/60'
+                        : 'focus:border-indigo-500/40'
                     }`}
                   />
                   {fieldErrors.businessName && (
@@ -429,7 +429,7 @@ export function RegisterPage() {
 
                 {/* Type of Business */}
                 <div>
-                  <label className="text-xs text-white/40 font-medium block mb-1.5 flex items-center gap-1.5">
+                  <label className="text-xs text-white/40 font-medium  mb-1.5 flex items-center gap-1.5">
                     <Briefcase className="w-3 h-3" /> Type of Business
                   </label>
                   <div className="relative">
@@ -437,18 +437,18 @@ export function RegisterPage() {
                       type="button"
                       onClick={() => setTypeOpen((o) => !o)}
                       className={`w-full glass rounded-xl px-4 py-2.5 text-sm text-left flex items-center justify-between transition-colors outline-none ${
-                        typeOpen ? "border-indigo-500/40" : ""
-                      } ${fieldErrors.businessType ? "border-rose-500/60" : ""}`}
+                        typeOpen ? 'border-indigo-500/40' : ''
+                      } ${fieldErrors.businessType ? 'border-rose-500/60' : ''}`}
                     >
                       <span
                         className={
-                          form.businessType ? "text-white/80" : "text-white/20"
+                          form.businessType ? 'text-white/80' : 'text-white/20'
                         }
                       >
-                        {form.businessType || "Select your business type"}
+                        {form.businessType || 'Select your business type'}
                       </span>
                       <ChevronDown
-                        className={`w-4 h-4 text-white/30 transition-transform ${typeOpen ? "rotate-180" : ""}`}
+                        className={`w-4 h-4 text-white/30 transition-transform ${typeOpen ? 'rotate-180' : ''}`}
                       />
                     </button>
                     <AnimatePresence>
@@ -459,7 +459,7 @@ export function RegisterPage() {
                           exit={{ opacity: 0, y: -4 }}
                           transition={{ duration: 0.15 }}
                           className="absolute top-full left-0 right-0 mt-1.5 z-50 rounded-xl overflow-hidden border border-white/10 shadow-2xl"
-                          style={{ background: "#0f1629" }}
+                          style={{ background: '#0f1629' }}
                         >
                           <div className="max-h-52 overflow-y-auto py-1">
                             {BUSINESS_TYPES.map((type) => (
@@ -473,14 +473,14 @@ export function RegisterPage() {
                                   }));
                                   setFieldErrors((fe) => ({
                                     ...fe,
-                                    businessType: "",
+                                    businessType: '',
                                   }));
                                   setTypeOpen(false);
                                 }}
                                 className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
                                   form.businessType === type
-                                    ? "bg-indigo-500/20 text-indigo-300"
-                                    : "text-white/65 hover:bg-white/5 hover:text-white/85"
+                                    ? 'bg-indigo-500/20 text-indigo-300'
+                                    : 'text-white/65 hover:bg-white/5 hover:text-white/85'
                                 }`}
                               >
                                 {type}
@@ -500,17 +500,17 @@ export function RegisterPage() {
 
                 {/* Owner's Name */}
                 <div>
-                  <label className="text-xs text-white/40 font-medium block mb-1.5 flex items-center gap-1.5">
+                  <label className="text-xs text-white/40 font-medium  mb-1.5 flex items-center gap-1.5">
                     <User className="w-3 h-3" /> Owner's Name
                   </label>
                   <input
                     value={form.ownerName}
-                    onChange={set("ownerName")}
+                    onChange={set('ownerName')}
                     placeholder="Your full name"
                     className={`w-full glass rounded-xl px-4 py-2.5 text-sm text-white/80 placeholder:text-white/20 outline-none transition-colors ${
                       fieldErrors.ownerName
-                        ? "border-rose-500/60"
-                        : "focus:border-indigo-500/40"
+                        ? 'border-rose-500/60'
+                        : 'focus:border-indigo-500/40'
                     }`}
                   />
                   {fieldErrors.ownerName && (
@@ -552,18 +552,18 @@ export function RegisterPage() {
               >
                 {/* Email */}
                 <div>
-                  <label className="text-xs text-white/40 font-medium block mb-1.5 flex items-center gap-1.5">
+                  <label className="text-xs text-white/40 font-medium  mb-1.5 flex items-center gap-1.5">
                     <Mail className="w-3 h-3" /> Email Address
                   </label>
                   <input
                     type="email"
                     value={form.email}
-                    onChange={set("email")}
+                    onChange={set('email')}
                     placeholder="you@yourbusiness.com"
                     className={`w-full glass rounded-xl px-4 py-2.5 text-sm text-white/80 placeholder:text-white/20 outline-none transition-colors ${
                       fieldErrors.email
-                        ? "border-rose-500/60"
-                        : "focus:border-indigo-500/40"
+                        ? 'border-rose-500/60'
+                        : 'focus:border-indigo-500/40'
                     }`}
                   />
                   {fieldErrors.email && (
@@ -575,19 +575,19 @@ export function RegisterPage() {
 
                 {/* Password */}
                 <div>
-                  <label className="text-xs text-white/40 font-medium block mb-1.5 flex items-center gap-1.5">
+                  <label className="text-xs text-white/40 font-medium  mb-1.5 flex items-center gap-1.5">
                     <Lock className="w-3 h-3" /> Password
                   </label>
                   <div className="relative">
                     <input
-                      type={showPass ? "text" : "password"}
+                      type={showPass ? 'text' : 'password'}
                       value={form.password}
-                      onChange={set("password")}
+                      onChange={set('password')}
                       placeholder="Minimum 6 characters"
                       className={`w-full glass rounded-xl px-4 py-2.5 pr-10 text-sm text-white/80 placeholder:text-white/20 outline-none transition-colors ${
                         fieldErrors.password
-                          ? "border-rose-500/60"
-                          : "focus:border-indigo-500/40"
+                          ? 'border-rose-500/60'
+                          : 'focus:border-indigo-500/40'
                       }`}
                     />
                     <button
@@ -611,19 +611,19 @@ export function RegisterPage() {
 
                 {/* Confirm Password */}
                 <div>
-                  <label className="text-xs text-white/40 font-medium block mb-1.5 flex items-center gap-1.5">
+                  <label className="text-xs text-white/40 font-medium  mb-1.5 flex items-center gap-1.5">
                     <Lock className="w-3 h-3" /> Confirm Password
                   </label>
                   <div className="relative">
                     <input
-                      type={showConfirm ? "text" : "password"}
+                      type={showConfirm ? 'text' : 'password'}
                       value={form.confirmPassword}
-                      onChange={set("confirmPassword")}
+                      onChange={set('confirmPassword')}
                       placeholder="Re-enter your password"
                       className={`w-full glass rounded-xl px-4 py-2.5 pr-10 text-sm text-white/80 placeholder:text-white/20 outline-none transition-colors ${
                         fieldErrors.confirmPassword
-                          ? "border-rose-500/60"
-                          : "focus:border-indigo-500/40"
+                          ? 'border-rose-500/60'
+                          : 'focus:border-indigo-500/40'
                       }`}
                     />
                     <button
@@ -649,7 +649,7 @@ export function RegisterPage() {
                   {error && (
                     <motion.p
                       initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
+                      animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
                       className="text-xs text-rose-400 bg-rose-500/10 rounded-lg px-3 py-2 border border-rose-500/20"
                     >
@@ -686,7 +686,7 @@ export function RegisterPage() {
           </AnimatePresence>
 
           <p className="text-center text-xs text-white/25 mt-5">
-            Already have an account?{" "}
+            Already have an account?{' '}
             <Link
               to="/login"
               className="text-indigo-400 hover:text-indigo-300 transition-colors"

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { EmployeeProvider } from './contexts/EmployeeContext';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { DashboardLayout } from './components/layouts/DashboardLayout';
 
@@ -44,7 +45,14 @@ function OwnerPortal() {
           <Route path="purchases" element={<PurchasesPage />} />
           <Route path="accounting" element={<AccountingPage />} />
           <Route path="customers" element={<CustomersPage />} />
-          <Route path="employees" element={<EmployeesPage />} />
+          <Route
+            path="employees"
+            element={
+              <EmployeeProvider>
+                <EmployeesPage />
+              </EmployeeProvider>
+            }
+          />
           <Route path="reports" element={<ReportsPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="settings" element={<SettingsPage />} />

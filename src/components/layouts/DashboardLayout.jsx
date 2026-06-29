@@ -73,12 +73,12 @@ function getPortalLabel(role) {
 }
 
 export function DashboardLayout({ children }) {
-  const { user, profile, logout, loading } = useAuth();
+  const { user, profile, logout, loading, effectiveRole } = useAuth();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const nav = getNav(profile?.role);
+  const nav = getNav(effectiveRole);
   const handleLogout = () => {
     setShowLogoutModal(true);
   };
@@ -113,7 +113,7 @@ export function DashboardLayout({ children }) {
               OnERPos
             </p>
             <p className="text-[10px] text-white/30 capitalize truncate">
-              {profile?.role}
+              {effectiveRole}
             </p>
           </motion.div>
         )}
@@ -160,7 +160,7 @@ export function DashboardLayout({ children }) {
                 {profile?.name}
               </p>
               <p className="text-[10px] text-white/30 capitalize truncate">
-                {profile?.role}
+                {effectiveRole}
               </p>
             </div>
           </div>

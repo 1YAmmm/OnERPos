@@ -19,13 +19,13 @@ import {
   FormActions,
 } from '../../components/common/Modal';
 
-const POSITIONS = ['Store Manager', 'Cashier', 'Sales Associate', 'Supervisor'];
+const POSITIONS = ['Admin', 'Cashier'];
 
 const emptyForm = {
   fullName: '',
   email: '',
   password: '',
-  position: 'Sales Associate',
+  position: 'Admin',
   hourlyRate: '',
   hireDate: new Date().toISOString().slice(0, 10),
   status: 'active',

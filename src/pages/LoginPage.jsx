@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap,
   Eye,
@@ -9,31 +9,39 @@ import {
   ShieldCheck,
   Store,
   BarChart3,
-} from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
-import logo from "../assets/onerposlogo.webp";
+} from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import logo from '../assets/onerposlogo.webp';
 
-
-const REDIRECT = { owner: "/owner", cashier: "/cashier", admin: "/admin" };
+const REDIRECT = {
+  owner: '/owner',
+  system_admin: '/admin',
+};
 
 export function LoginPage() {
   const { login, loading, error } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [selectedRole, setSelectedRole] = useState(null);
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role);
     setEmail(role.hint);
-    setPassword("demo");
+    setPassword('demo');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await login(email, password);
-   if (result.success) navigate(REDIRECT[result.role] ?? "/");
+    if (result.success) {
+      const dest =
+        result.role === 'employee'
+          ? `/${result.position?.toLowerCase()}`
+          : (REDIRECT[result.role] ?? '/');
+      navigate(dest);
+    }
   };
 
   return (
@@ -100,7 +108,7 @@ export function LoginPage() {
               </label>
               <div className="relative">
                 <input
-                  type={showPass ? "text" : "password"}
+                  type={showPass ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
@@ -125,7 +133,7 @@ export function LoginPage() {
               {error && (
                 <motion.p
                   initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
+                  animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                   className="text-xs text-rose-400 bg-rose-500/10 rounded-lg px-3 py-2 border border-rose-500/20"
                 >
@@ -159,7 +167,7 @@ export function LoginPage() {
             </Link>
           </p>
           <p className="text-center text-xs text-white/25 mt-2">
-            New business?{" "}
+            New business?{' '}
             <Link
               to="/register"
               className="text-indigo-400 hover:text-indigo-300 transition-colors"

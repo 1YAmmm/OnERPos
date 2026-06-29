@@ -1,5 +1,3 @@
-// src/contexts/AuthContext.jsx
-
 import { createContext, useContext, useEffect, useState } from 'react';
 import { authService } from '../services/authService';
 
@@ -7,16 +5,20 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null); // includes role + business info
-  const [loading, setLoading] = useState(true); // true on mount while restoring session
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // ── Restore session on app load ──
+  // Derive effectiveRole from profile
+  const effectiveRole =
+    profile?.role === 'employee'
+      ? profile?.position?.toLowerCase() // 'Cashier' → 'cashier', 'Admin' → 'admin'
+      : (profile?.role ?? null);
+
   useEffect(() => {
     const restored = authService.getUser();
     if (restored) setUser(restored);
 
-    // Also try to fetch full profile if token exists
     if (authService.isAuthenticated()) {
       authService
         .fetchMe()
@@ -25,7 +27,6 @@ export function AuthProvider({ children }) {
           setProfile(p);
         })
         .catch(() => {
-          // Token expired or invalid — clear everything
           authService.logout();
           setUser(null);
           setProfile(null);
@@ -36,7 +37,6 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // ── Register onwer──
   const register = async (form) => {
     setLoading(true);
     setError('');
@@ -51,7 +51,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // ── Login ──
   const login = async (email, password) => {
     setLoading(true);
     setError('');
@@ -59,11 +58,12 @@ export function AuthProvider({ children }) {
       const { user: u } = await authService.login(email, password);
       setUser(u);
 
-      // Fetch full profile after login to get role + business info
       const { profile: p } = await authService.fetchMe();
       setProfile(p);
 
-      return { success: true, role: p?.role };
+      const role = p?.role;
+      const position = p?.position;
+      return { success: true, role, position };
     } catch (err) {
       setError(err.message);
       return { success: false };
@@ -72,7 +72,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // ── Logout ──
   const logout = async () => {
     setLoading(true);
     setError('');
@@ -87,35 +86,31 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // ── Clear error manually (useful in forms) ──
   const clearError = () => setError('');
 
   return (
     <AuthContext.Provider
       value={{
-        // State
         user,
         profile,
         loading,
         error,
 
-        // Auth actions
         register,
         login,
         logout,
         clearError,
 
-        // Token
         getToken: authService.getToken,
-
-        // Auth status
         isAuthenticated: !!user,
 
-        // Role booleans — use these in your UI
+        // Role booleans
         isOwner: profile?.role === 'owner',
         isEmployee: profile?.role === 'employee',
         isSystemAdmin: profile?.role === 'system_admin',
-        role: profile?.role || null,
+
+        role: profile?.role ?? null,
+        effectiveRole, // 'owner' | 'cashier' | 'admin' | 'system_admin' | null
       }}
     >
       {children}

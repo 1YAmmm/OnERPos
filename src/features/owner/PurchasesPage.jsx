@@ -7,6 +7,8 @@ import {
   ChevronDown,
   Check,
   Package,
+  Search,
+  X,
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { GlassCard } from '../../components/common/GlassCard';
@@ -81,7 +83,8 @@ function ProductDropdown({ value, products, onChange }) {
                 <div>
                   <p className="text-sm text-white/80">{p.name}</p>
                   <p className="text-xs text-white/35">
-                    {p.category} · {p.unit_size ?? 1} {p.unit} · ${p.cost}/unit
+                    {p.category} · {p.unit}
+                    {p.description ? ` · ${p.description}` : ''}
                   </p>
                 </div>
                 {value === p.id && (
@@ -122,8 +125,9 @@ function POForm({ initial, products, onSubmit, onCancel, submitting, error }) {
         productId: '',
         productName: '',
         category: 'Beverages',
+        unit: 'unit',
+        description: '',
         unitCost: '',
-        unitSize: '1',
       }));
     } else {
       const found = products.find((p) => p.id === productId);
@@ -134,7 +138,7 @@ function POForm({ initial, products, onSubmit, onCancel, submitting, error }) {
         productName: found?.name ?? '',
         category: found?.category ?? f.category,
         unit: found?.unit ?? f.unit,
-        unitSize: found?.unit_size != null ? String(found.unit_size) : '1',
+        description: found?.description ?? '', // ← auto-fill from product
         unitCost: found?.cost != null ? String(found.cost) : f.unitCost,
       }));
     }
@@ -191,7 +195,7 @@ function POForm({ initial, products, onSubmit, onCancel, submitting, error }) {
                   productId: '',
                   productName: '',
                   unitCost: '',
-                  unitSize: '1',
+                  description: '',
                 }))
               }
               className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
@@ -258,8 +262,8 @@ function POForm({ initial, products, onSubmit, onCancel, submitting, error }) {
           </div>
         )}
 
-        {/* Qty + Unit + Unit Size + Unit Cost */}
-        <div className="grid grid-cols-4 gap-3">
+        {/* Qty + Unit + Cost */}
+        <div className="grid grid-cols-3 gap-3">
           <Field label="Quantity">
             <Input
               required
@@ -287,17 +291,6 @@ function POForm({ initial, products, onSubmit, onCancel, submitting, error }) {
               ))}
             </select>
           </Field>
-          <Field label="Size per Unit">
-            <Input
-              required
-              type="number"
-              step="0.01"
-              min="0.01"
-              value={form.unitSize}
-              onChange={set('unitSize')}
-              placeholder="e.g. 50"
-            />
-          </Field>
           <Field label="Cost per Unit ($)">
             <Input
               required
@@ -311,16 +304,14 @@ function POForm({ initial, products, onSubmit, onCancel, submitting, error }) {
           </Field>
         </div>
 
-        {/* Unit size hint */}
-        {form.unit && form.unitSize && (
-          <p className="text-xs text-white/25 px-1">
-            Each {form.unit} = {form.unitSize}{' '}
-            {form.unit === 'kg' ? 'kg' : form.unit === 'litre' ? 'L' : 'pcs'}
-            {form.quantity && form.unitSize
-              ? ` · Total: ${(parseFloat(form.quantity) * parseFloat(form.unitSize)).toFixed(2)}`
-              : ''}
-          </p>
-        )}
+        {/* Description — free text */}
+        <Field label="Description (optional)">
+          <Input
+            value={form.description}
+            onChange={set('description')}
+            placeholder="e.g. 50kg per bag, 24 cans per box, imported…"
+          />
+        </Field>
       </div>
 
       {/* Expected Date */}
@@ -348,7 +339,7 @@ function POForm({ initial, products, onSubmit, onCancel, submitting, error }) {
         </p>
       )}
 
-      {/* Save actions = status */}
+      {/* Save actions */}
       <div className="flex items-center justify-between pt-1 flex-wrap gap-2">
         <button
           type="button"
@@ -424,11 +415,25 @@ export function PurchasesPage() {
         productName: '',
         category: 'Beverages',
         unit: 'unit',
-        unitSize: '1', // ← default 1
+        description: '', // ← replaced unitSize
         quantity: '',
         unitCost: '',
       }
     : editTarget;
+
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const filtered = orders.filter((o) => {
+    const q = search.toLowerCase();
+    const matchSearch =
+      !q ||
+      o.poNumber?.toLowerCase().includes(q) ||
+      o.supplier?.toLowerCase().includes(q) ||
+      o.productName?.toLowerCase().includes(q);
+    const matchStatus = statusFilter === 'all' || o.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
 
   const handleSubmit = (form) => {
     if (isNew) createOrder(form);
@@ -451,6 +456,9 @@ export function PurchasesPage() {
         <div>
           <p className="text-sm text-white/75">{v || '—'}</p>
           <p className="text-xs text-white/30">{r.category}</p>
+          {r.description && (
+            <p className="text-xs text-white/20 italic">{r.description}</p>
+          )}
         </div>
       ),
     },
@@ -458,16 +466,18 @@ export function PurchasesPage() {
       key: 'quantity',
       label: 'Qty',
       render: (v, r) => (
-        <div>
-          <p className="text-sm text-white/70">
-            {v} {r.unit}
-          </p>
-          {r.unitSize && r.unitSize !== 1 && (
-            <p className="text-xs text-white/30">
-              {r.unitSize} per {r.unit}
-            </p>
-          )}
-        </div>
+        <span className="text-white/60 text-sm">
+          {v} {r.unit}
+        </span>
+      ),
+    },
+    {
+      key: 'unitCost',
+      label: 'Cost/Unit',
+      render: (v) => (
+        <span className="text-white/60 text-sm">
+          ${Number(v ?? 0).toFixed(2)}
+        </span>
       ),
     },
     {
@@ -542,21 +552,73 @@ export function PurchasesPage() {
       </div>
 
       <GlassCard delay={0.2} className="p-5">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
           <h3 className="text-sm font-semibold text-white/80">
             Purchase Orders
           </h3>
-          <Button size="sm" onClick={openCreate}>
-            <Plus className="w-3.5 h-3.5" />
-            New Order
-          </Button>
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/25" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search PO, supplier, product…"
+                className="glass rounded-xl pl-8 pr-8 py-2 text-xs text-white/70 placeholder:text-white/25 outline-none w-56"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+
+            {/* Status filter pills */}
+            <div className="flex gap-1">
+              {['all', 'pending', 'in_transit', 'received'].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setStatusFilter(s)}
+                  className={`px-2.5 py-1.5 text-xs rounded-lg transition-colors ${
+                    statusFilter === s
+                      ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                      : 'glass text-white/35 hover:text-white/60'
+                  }`}
+                >
+                  {s === 'all'
+                    ? 'All'
+                    : s === 'in_transit'
+                      ? 'In Transit'
+                      : s.charAt(0).toUpperCase() + s.slice(1)}
+                </button>
+              ))}
+            </div>
+
+            <Button size="sm" onClick={openCreate}>
+              <Plus className="w-3.5 h-3.5" />
+              New Order
+            </Button>
+          </div>
         </div>
+
+        {/* Result count */}
+        {(search || statusFilter !== 'all') && (
+          <p className="text-xs text-white/25 mb-3">
+            {filtered.length} of {orders.length} orders
+            {search && ` matching "${search}"`}
+            {statusFilter !== 'all' &&
+              ` · ${statusFilter === 'in_transit' ? 'in transit' : statusFilter}`}
+          </p>
+        )}
         {error && !modalOpen && (
           <p className="text-xs text-rose-400 bg-rose-500/10 rounded-lg px-3 py-2 border border-rose-500/20 mb-3">
             {error}
           </p>
         )}
-        <DataTable columns={cols} data={orders} />
+        <DataTable columns={cols} data={filtered} />
       </GlassCard>
 
       <Modal

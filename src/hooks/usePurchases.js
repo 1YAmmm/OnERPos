@@ -2,10 +2,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { purchaseService } from '../services/purchaseService';
 import { useAuth } from '../contexts/AuthContext';
+import { useAppToast } from './useAppToast';
 
 export function usePurchases() {
   const { profile } = useAuth();
   const ownerId = profile?.id;
+  const toast = useAppToast();
 
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
@@ -25,6 +27,7 @@ export function usePurchases() {
       setOrders(data);
     } catch (err) {
       setError(err.message);
+      toast.purchase.fetchFailed();
     } finally {
       setLoading(false);
     }
@@ -35,7 +38,7 @@ export function usePurchases() {
       const { supabase } = await import('../utils/supabaseClient');
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, category, cost, unit, unit_size') // ← added unit_size
+        .select('id, name, category, cost, unit, description')
         .eq('owner_id', ownerId)
         .order('name');
       if (error) throw new Error(error.message);
@@ -77,11 +80,17 @@ export function usePurchases() {
     try {
       const created = await purchaseService.create(form, ownerId);
       setOrders((prev) => [created, ...prev]);
-      if (form.status === 'received') fetchProducts();
+      if (form.status === 'received') {
+        fetchProducts();
+        toast.purchase.received(created.poNumber);
+      } else {
+        toast.purchase.created(created.poNumber);
+      }
       closeModal();
       return { success: true };
     } catch (err) {
       setError(err.message);
+      toast.purchase.saveFailed(err.message);
       return { success: false, error: err.message };
     } finally {
       setSubmitting(false);
@@ -94,11 +103,17 @@ export function usePurchases() {
     try {
       const updated = await purchaseService.update(id, form, ownerId);
       setOrders((prev) => prev.map((o) => (o.id === id ? updated : o)));
-      if (form.status === 'received') fetchProducts();
+      if (form.status === 'received') {
+        fetchProducts();
+        toast.purchase.received(updated.poNumber);
+      } else {
+        toast.purchase.updated(updated.poNumber);
+      }
       closeModal();
       return { success: true };
     } catch (err) {
       setError(err.message);
+      toast.purchase.saveFailed(err.message);
       return { success: false, error: err.message };
     } finally {
       setSubmitting(false);
@@ -108,12 +123,15 @@ export function usePurchases() {
   const deleteOrder = async (id) => {
     setError(null);
     try {
+      const target = orders.find((o) => o.id === id);
       await purchaseService.remove(id);
       setOrders((prev) => prev.filter((o) => o.id !== id));
       setDeleteTarget(null);
+      toast.purchase.deleted(target?.poNumber ?? 'Order');
       return { success: true };
     } catch (err) {
       setError(err.message);
+      toast.purchase.saveFailed(err.message);
       return { success: false, error: err.message };
     }
   };

@@ -26,12 +26,11 @@ function toDbPayload(form, ownerId) {
     category: form.category,
     quantity: parseInt(form.quantity, 10),
     unit: form.unit,
-    unit_size: parseFloat(form.unitSize) || 1, // ← new
+    description: form.description?.trim() || null, // ← replaced unit_size
     unit_cost: parseFloat(form.unitCost),
     po_date: form.poDate,
     expected_date: form.expectedDate || null,
     status: form.status,
-    // total is a generated column (quantity * unit_cost), not sent
   };
 }
 
@@ -46,7 +45,7 @@ function fromDb(row) {
     category: row.category,
     quantity: row.quantity,
     unit: row.unit,
-    unitSize: row.unit_size, // ← new
+    description: row.description, // ← replaced unit_size
     unitCost: row.unit_cost,
     total: row.total,
     poDate: row.po_date,
@@ -59,25 +58,20 @@ function fromDb(row) {
 }
 
 export const purchaseService = {
-  // ── Get all POs ──
   async getAll() {
     const rows = await purchaseRepository.getAll();
     return rows.map(fromDb);
   },
 
-  // ── Generate PO number ──
   async generatePoNumber() {
     return generatePoNumber();
   },
 
-  // ── Create PO ──
   async create(form, ownerId) {
     if (!form.supplier?.trim()) throw new Error('Supplier name is required');
     if (!form.productName?.trim()) throw new Error('Product name is required');
     if (!form.quantity || parseInt(form.quantity) < 1)
       throw new Error('Quantity must be at least 1');
-    if (!form.unitSize || parseFloat(form.unitSize) <= 0)
-      throw new Error('Unit size must be greater than 0');
     if (!form.unitCost || parseFloat(form.unitCost) < 0)
       throw new Error('Unit cost is required');
 
@@ -86,7 +80,6 @@ export const purchaseService = {
     return fromDb(row);
   },
 
-  // ── Update PO ──
   async update(id, form, ownerId) {
     if (!form.supplier?.trim()) throw new Error('Supplier name is required');
 
@@ -95,7 +88,6 @@ export const purchaseService = {
     return fromDb(row);
   },
 
-  // ── Delete PO ──
   async remove(id) {
     return purchaseRepository.remove(id);
   },

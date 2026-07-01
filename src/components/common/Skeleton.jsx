@@ -480,7 +480,7 @@ export function ReportsSkeleton() {
         {Array.from({ length: 2 }).map((_, i) => (
           <div key={i} className="glass rounded-2xl p-5 space-y-4">
             <div className="h-4 w-36 bg-white/10 rounded-md" />
-            <div className="h-[220px] bg-white/4 rounded-xl" />
+            <div className="h-50 bg-white/4 rounded-xl" />
           </div>
         ))}
       </div>
@@ -532,7 +532,7 @@ export function SalesSkeleton() {
       {/* Chart */}
       <div className="glass rounded-2xl p-5 space-y-4">
         <div className="h-4 w-36 bg-white/10 rounded-md" />
-        <div className="h-[200px] bg-white/4 rounded-xl" />
+        <div className="h-50 bg-white/4 rounded-xl" />
       </div>
 
       {/* Table */}

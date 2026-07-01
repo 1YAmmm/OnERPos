@@ -30,6 +30,34 @@ export function useAppToast() {
         }),
     },
 
+    // ── Purchases ──────────────────────────────────────────────────────────
+    purchase: {
+      created: (poNumber) =>
+        toast.success('Purchase order created', {
+          message: `${poNumber} has been saved.`,
+        }),
+      updated: (poNumber) =>
+        toast.success('Purchase order updated', {
+          message: `${poNumber} has been updated.`,
+        }),
+      received: (poNumber) =>
+        toast.success('Stock updated', {
+          message: `${poNumber} marked as received — inventory has been updated.`,
+        }),
+      deleted: (poNumber) =>
+        toast.error('Purchase order deleted', {
+          message: `${poNumber} has been removed.`,
+        }),
+      fetchFailed: () =>
+        toast.error('Failed to load purchase orders', {
+          message: 'Check your connection and refresh.',
+        }),
+      saveFailed: (err) =>
+        toast.error('Failed to save', {
+          message: err ?? 'Something went wrong.',
+        }),
+    },
+
     // ── Auth ───────────────────────────────────────────────────────────────
     auth: {
       loggedIn: (name) =>

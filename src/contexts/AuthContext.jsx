@@ -1,3 +1,5 @@
+// src/contexts/AuthContext.jsx
+
 import { createContext, useContext, useEffect, useState } from 'react';
 import { authService } from '../services/authService';
 
@@ -9,34 +11,37 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Derive effectiveRole from profile
   const effectiveRole =
     profile?.role === 'employee'
-      ? profile?.position?.toLowerCase() // 'Cashier' → 'cashier', 'Admin' → 'admin'
+      ? profile?.position?.toLowerCase()
       : (profile?.role ?? null);
 
+  // ── Restore session on app load ──
   useEffect(() => {
-    const restored = authService.getUser();
-    if (restored) setUser(restored);
+    async function restore() {
+      try {
+        const session = await authService.restoreSession();
+        if (!session) {
+          setLoading(false);
+          return;
+        }
 
-    if (authService.isAuthenticated()) {
-      authService
-        .fetchMe()
-        .then(({ user: u, profile: p }) => {
-          setUser(u);
-          setProfile(p);
-        })
-        .catch(() => {
-          authService.logout();
-          setUser(null);
-          setProfile(null);
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
+        const { user: u, profile: p } = await authService.fetchMe();
+        setUser(u);
+        setProfile(p);
+      } catch {
+        await authService.logout();
+        setUser(null);
+        setProfile(null);
+      } finally {
+        setLoading(false);
+      }
     }
+
+    restore();
   }, []);
 
+  // ── Register ──
   const register = async (form) => {
     setLoading(true);
     setError('');
@@ -51,6 +56,7 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // ── Login ──
   const login = async (email, password) => {
     setLoading(true);
     setError('');
@@ -61,9 +67,7 @@ export function AuthProvider({ children }) {
       const { profile: p } = await authService.fetchMe();
       setProfile(p);
 
-      const role = p?.role;
-      const position = p?.position;
-      return { success: true, role, position };
+      return { success: true, role: p?.role, position: p?.position };
     } catch (err) {
       setError(err.message);
       return { success: false };
@@ -72,6 +76,7 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // ── Logout ──
   const logout = async () => {
     setLoading(true);
     setError('');
@@ -104,13 +109,12 @@ export function AuthProvider({ children }) {
         getToken: authService.getToken,
         isAuthenticated: !!user,
 
-        // Role booleans
         isOwner: profile?.role === 'owner',
         isEmployee: profile?.role === 'employee',
         isSystemAdmin: profile?.role === 'system_admin',
 
         role: profile?.role ?? null,
-        effectiveRole, // 'owner' | 'cashier' | 'admin' | 'system_admin' | null
+        effectiveRole,
       }}
     >
       {children}

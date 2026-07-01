@@ -1,13 +1,13 @@
 // src/services/authService.js
 
 import { authRepository } from '../repositories/authRepository';
+import { supabase } from '../utils/supabaseClient';
 
 const SESSION_KEY = 'onerpos_session';
 
 export const authService = {
   // ── Register (owner only) ──
   async register({ businessName, businessType, ownerName, email, password }) {
-    // Validation — business rules only, UI already validates format
     if (!email || !email.includes('@'))
       throw new Error('Invalid email address');
     if (!password || password.length < 6)
@@ -16,7 +16,6 @@ export const authService = {
     if (!businessType) throw new Error('Business type is required');
     if (!ownerName?.trim()) throw new Error('Owner name is required');
 
-    // confirmPassword never reaches here — already stripped by repository
     await authRepository.register({
       businessName,
       businessType,
@@ -36,13 +35,42 @@ export const authService = {
 
     if (!data.session) throw new Error('Login failed — no session returned');
 
-    // Persist full session (has access_token, refresh_token, user)
-    localStorage.setItem(SESSION_KEY, JSON.stringify(data.session));
+    // ── Sync session to supabase client so RLS works ──
+    await supabase.auth.setSession({
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token,
+    });
 
-    // Also persist user separately for quick access
+    // Persist full session
+    localStorage.setItem(SESSION_KEY, JSON.stringify(data.session));
     localStorage.setItem(`${SESSION_KEY}_user`, JSON.stringify(data.user));
 
     return { user: data.user, session: data.session };
+  },
+
+  // ── Restore session on app load (call this on mount) ──
+  async restoreSession() {
+    const session = authService.getSession();
+    if (!session?.access_token) return null;
+
+    // Sync stored session back into the supabase client
+    const { data, error } = await supabase.auth.setSession({
+      access_token: session.access_token,
+      refresh_token: session.refresh_token,
+    });
+
+    if (error) {
+      // Token expired — clear everything
+      authService._clearLocal();
+      return null;
+    }
+
+    // If supabase refreshed the token, save the new session
+    if (data.session) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify(data.session));
+    }
+
+    return data.session;
   },
 
   // ── Logout ──
@@ -50,11 +78,11 @@ export const authService = {
     try {
       const token = authService.getToken();
       if (token) await authRepository.logout(token);
+      await supabase.auth.signOut();
     } catch {
-      // Even if API call fails, clear local session
+      // ignore errors, always clear local
     } finally {
-      localStorage.removeItem(SESSION_KEY);
-      localStorage.removeItem(`${SESSION_KEY}_user`);
+      authService._clearLocal();
     }
   },
 
@@ -63,7 +91,6 @@ export const authService = {
     const token = authService.getToken();
     if (!token) throw new Error('Not authenticated');
     return authRepository.getMe(token);
-    // returns { user, profile } — profile includes role, business info
   },
 
   // ── Session helpers ──
@@ -87,6 +114,10 @@ export const authService = {
     }
   },
 
+  isAuthenticated() {
+    return !!authService.getToken();
+  },
+
   // ── Role helpers ──
   getRole() {
     return authService.getUser()?.role || null;
@@ -104,7 +135,9 @@ export const authService = {
     return authService.getRole() === 'system_admin';
   },
 
-  isAuthenticated() {
-    return !!authService.getToken();
+  // ── Internal: clear localStorage ──
+  _clearLocal() {
+    localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(`${SESSION_KEY}_user`);
   },
 };

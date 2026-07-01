@@ -1,22 +1,21 @@
 import { useState, useEffect } from 'react';
-import { AlertTriangle, Plus, Pencil, Trash2 } from 'lucide-react';
+import { AlertTriangle, Pencil, Trash2 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { GlassCard } from '../../components/common/GlassCard';
 import { DataTable } from '../../components/common/DataTable';
 import { Badge } from '../../components/common/Badge';
 import { SearchBar } from '../../components/common/SearchBar';
-import { Button } from '../../components/common/Button';
 import {
   Modal,
   DeleteModal,
   Field,
   Input,
-  Select,
   FormActions,
 } from '../../components/common/Modal';
 import { useCrud } from '../../hooks/useCrud';
 import { PRODUCTS } from '../../data/mockData';
 import { InventorySkeleton } from '../../components/common/Skeleton';
+
 const CATEGORIES = [
   'Beverages',
   'Furniture',
@@ -25,22 +24,11 @@ const CATEGORIES = [
   'Food',
   'Other',
 ];
-const UNITS = ['bag', 'unit', 'box', 'kg', 'litre', 'pair'];
+const UNITS = ['bag', 'unit', 'box', 'kg', 'litre', 'pair', 'piece', 'carton'];
 const EMOJIS = ['📦', '☕', '🪑', '⌨️', '👕', '🍎', '💡', '🖥️'];
 
-const emptyForm = {
-  name: '',
-  sku: '',
-  category: 'Beverages',
-  price: '',
-  cost: '',
-  stock: '',
-  reorderPoint: '',
-  unit: 'unit',
-  image: '📦',
-};
-
-function ProductForm({ initial = emptyForm, onSubmit, onCancel }) {
+// ── Product Edit Form (no stock, no cost, no SKU change) ──────────────────────
+function ProductEditForm({ initial, onSubmit, onCancel }) {
   const [form, setForm] = useState(initial);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -48,19 +36,14 @@ function ProductForm({ initial = emptyForm, onSubmit, onCancel }) {
     e.preventDefault();
     onSubmit({
       ...form,
-      price: parseFloat(form.price),
-      cost: parseFloat(form.cost),
-      stock: parseInt(form.stock, 10),
-      reorderPoint: parseInt(form.reorderPoint, 10),
-      status:
-        parseInt(form.stock, 10) <= parseInt(form.reorderPoint, 10)
-          ? 'low_stock'
-          : 'active',
+      price: parseFloat(form.price) || 0,
+      reorderPoint: parseInt(form.reorderPoint, 10) || 0,
     });
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Name + SKU (SKU locked) */}
       <div className="grid grid-cols-2 gap-4">
         <Field label="Product Name">
           <Input
@@ -72,33 +55,44 @@ function ProductForm({ initial = emptyForm, onSubmit, onCancel }) {
         </Field>
         <Field label="SKU">
           <Input
-            required
             value={form.sku}
-            onChange={set('sku')}
-            placeholder="e.g. BEV-001"
+            disabled
+            className="opacity-50 cursor-not-allowed"
           />
         </Field>
       </div>
+
+      {/* Category + Unit */}
       <div className="grid grid-cols-2 gap-4">
         <Field label="Category">
-          <Select value={form.category} onChange={set('category')}>
+          <select
+            value={form.category}
+            onChange={set('category')}
+            className="w-full rounded-xl px-3 py-2 text-sm outline-none border border-white/10 bg-[#0f1521] text-white/80"
+          >
             {CATEGORIES.map((c) => (
-              <option key={c} value={c}>
+              <option key={c} value={c} className="bg-[#0f1521] text-white/80">
                 {c}
               </option>
             ))}
-          </Select>
+          </select>
         </Field>
         <Field label="Unit">
-          <Select value={form.unit} onChange={set('unit')}>
+          <select
+            value={form.unit}
+            onChange={set('unit')}
+            className="w-full rounded-xl px-3 py-2 text-sm outline-none border border-white/10 bg-[#0f1521] text-white/80"
+          >
             {UNITS.map((u) => (
-              <option key={u} value={u}>
+              <option key={u} value={u} className="bg-[#0f1521] text-white/80">
                 {u}
               </option>
             ))}
-          </Select>
+          </select>
         </Field>
       </div>
+
+      {/* Selling Price + Reorder Point */}
       <div className="grid grid-cols-2 gap-4">
         <Field label="Selling Price ($)">
           <Input
@@ -111,29 +105,6 @@ function ProductForm({ initial = emptyForm, onSubmit, onCancel }) {
             placeholder="0.00"
           />
         </Field>
-        <Field label="Cost Price ($)">
-          <Input
-            required
-            type="number"
-            step="0.01"
-            min="0"
-            value={form.cost}
-            onChange={set('cost')}
-            placeholder="0.00"
-          />
-        </Field>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <Field label="Stock Quantity">
-          <Input
-            required
-            type="number"
-            min="0"
-            value={form.stock}
-            onChange={set('stock')}
-            placeholder="0"
-          />
-        </Field>
         <Field label="Reorder Point">
           <Input
             required
@@ -141,50 +112,65 @@ function ProductForm({ initial = emptyForm, onSubmit, onCancel }) {
             min="0"
             value={form.reorderPoint}
             onChange={set('reorderPoint')}
-            placeholder="0"
+            placeholder="e.g. 10"
           />
         </Field>
       </div>
-      <Field label="Icon Emoji">
+
+      {/* Stock info — read only */}
+      <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl bg-indigo-500/5 border border-indigo-500/15">
+        <AlertTriangle className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />
+        <p className="text-xs text-indigo-300/70">
+          Stock and cost are managed automatically via Purchase Orders and
+          Sales.
+        </p>
+      </div>
+
+      {/* Icon */}
+      <Field label="Icon">
         <div className="flex gap-2 flex-wrap">
           {EMOJIS.map((e) => (
             <button
               key={e}
               type="button"
               onClick={() => setForm((f) => ({ ...f, image: e }))}
-              className={`text-xl p-2 rounded-xl transition-all ${form.image === e ? 'bg-indigo-600/40 ring-1 ring-indigo-500' : 'glass hover:bg-white/8'}`}
+              className={`text-xl p-2 rounded-xl transition-all ${
+                form.image === e
+                  ? 'bg-indigo-600/40 ring-1 ring-indigo-500'
+                  : 'glass hover:bg-white/8'
+              }`}
             >
               {e}
             </button>
           ))}
         </div>
       </Field>
-      <FormActions
-        onCancel={onCancel}
-        submitLabel={initial.name ? 'Update Product' : 'Add Product'}
-      />
+
+      <FormActions onCancel={onCancel} submitLabel="Update Product" />
     </form>
   );
 }
 
+// ── Main Page ─────────────────────────────────────────────────────────────────
 export function InventoryPage() {
   const [search, setSearch] = useState('');
-  const crud = useCrud(PRODUCTS);
   const [loading, setLoading] = useState(true);
   const {
     items,
     editTarget,
     deleteTarget,
-    isNew,
-    openCreate,
     openEdit,
     closeEdit,
     openDelete,
     closeDelete,
-    create,
     update,
     remove,
-  } = crud;
+  } = useCrud(PRODUCTS);
+
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(t);
+  }, []);
 
   const filtered = items.filter(
     (p) =>
@@ -193,7 +179,10 @@ export function InventoryPage() {
   );
 
   const lowStock = items.filter((p) => p.stock <= p.reorderPoint);
-  const invValue = items.reduce((s, p) => s + p.cost * p.stock, 0);
+  const invValue = items.reduce(
+    (s, p) => s + (p.cost ?? 0) * (p.stock ?? 0),
+    0
+  );
 
   const cols = [
     {
@@ -219,13 +208,21 @@ export function InventoryPage() {
     },
     {
       key: 'price',
-      label: 'Price',
-      render: (v) => <span className="font-semibold">${v.toFixed(2)}</span>,
+      label: 'Sell Price',
+      render: (v) => (
+        <span className="font-semibold text-white/80">
+          ${Number(v ?? 0).toFixed(2)}
+        </span>
+      ),
     },
     {
       key: 'cost',
       label: 'Cost',
-      render: (v) => <span className="text-white/50">${v.toFixed(2)}</span>,
+      render: (v) => (
+        <span className="text-white/40 text-xs">
+          {v != null ? `$${Number(v).toFixed(2)}` : '—'}
+        </span>
+      ),
     },
     {
       key: 'stock',
@@ -239,7 +236,7 @@ export function InventoryPage() {
                 : 'text-white/75'
             }
           >
-            {v}
+            {v ?? 0} {r.unit}
           </span>
           {v <= r.reorderPoint && (
             <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
@@ -247,8 +244,16 @@ export function InventoryPage() {
         </div>
       ),
     },
-    { key: 'reorderPoint', label: 'Reorder At' },
-    { key: 'status', label: 'Status', render: (v) => <Badge status={v} /> },
+    {
+      key: 'reorderPoint',
+      label: 'Reorder At',
+      render: (v) => <span className="text-white/40 text-xs">{v}</span>,
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (v) => <Badge status={v} />,
+    },
     {
       key: 'id',
       label: '',
@@ -270,16 +275,14 @@ export function InventoryPage() {
       ),
     },
   ];
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 1000);
-    return () => clearTimeout(t);
-  }, []);
+
   if (loading) return <InventorySkeleton />;
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Inventory Management"
-        subtitle="Stock levels, products, and reorder alerts"
+        subtitle="Product catalog, stock levels, and reorder alerts"
       />
 
       <div className="grid grid-cols-3 gap-4">
@@ -324,7 +327,7 @@ export function InventoryPage() {
             {lowStock.map((p) => (
               <p key={p.id} className="text-xs text-white/50">
                 <span className="text-white/70 font-medium">{p.name}</span> —
-                only {p.stock} units left (reorder at {p.reorderPoint})
+                only {p.stock} {p.unit} left (reorder at {p.reorderPoint})
               </p>
             ))}
           </div>
@@ -333,50 +336,46 @@ export function InventoryPage() {
 
       <GlassCard delay={0.25} className="p-5">
         <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-          <h3 className="text-sm font-semibold text-white/80">
-            Product Catalog
-          </h3>
-          <div className="flex gap-3 items-center">
-            <SearchBar
-              value={search}
-              onChange={setSearch}
-              placeholder="Search products…"
-              className="w-56"
-            />
-            <Button size="sm" onClick={openCreate}>
-              <Plus className="w-3.5 h-3.5" />
-              Add Product
-            </Button>
+          <div>
+            <h3 className="text-sm font-semibold text-white/80">
+              Product Catalog
+            </h3>
+            <p className="text-xs text-white/30 mt-0.5">
+              Products are added via Purchase Orders
+            </p>
           </div>
+          <SearchBar
+            value={search}
+            onChange={setSearch}
+            placeholder="Search products…"
+            className="w-56"
+          />
         </div>
         <DataTable columns={cols} data={filtered} />
       </GlassCard>
 
-      {/* Create / Edit Modal */}
       <Modal
         open={!!editTarget}
         onClose={closeEdit}
-        title={isNew ? 'Add Product' : 'Edit Product'}
+        title="Edit Product"
         size="lg"
       >
-        <ProductForm
-          initial={
-            isNew
-              ? emptyForm
-              : {
-                  ...editTarget,
-                  price: editTarget?.price ?? '',
-                  cost: editTarget?.cost ?? '',
-                  stock: editTarget?.stock ?? '',
-                  reorderPoint: editTarget?.reorderPoint ?? '',
-                }
-          }
-          onSubmit={isNew ? create : (fields) => update(editTarget.id, fields)}
-          onCancel={closeEdit}
-        />
+        {editTarget && (
+          <ProductEditForm
+            initial={{
+              ...editTarget,
+              price: editTarget.price ?? '',
+              reorderPoint: editTarget.reorderPoint ?? '',
+            }}
+            onSubmit={(fields) => {
+              update(editTarget.id, fields);
+              closeEdit();
+            }}
+            onCancel={closeEdit}
+          />
+        )}
       </Modal>
 
-      {/* Delete Confirm */}
       <DeleteModal
         open={!!deleteTarget}
         onClose={closeDelete}
